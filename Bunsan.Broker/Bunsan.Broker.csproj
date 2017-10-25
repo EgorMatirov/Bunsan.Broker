@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>Bunsan.Broker</PackageId>
+    <PackageVersion>0.1.0</PackageVersion>
+    <Authors>Mikhail Ivchenko</Authors>
+    <Description>
+    </Description>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageReleaseNotes>First release</PackageReleaseNotes>
+    <Copyright>Copyright 2017 (c) Mikhail Ivchenko. All rights reserved.</Copyright>
+    <PackageTags>bacs</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Bacs.Protocols.Broker" Version="0.1.2" />
+    <PackageReference Include="RabbitMQ.Client" Version="5.1.0-pre1" />
+    <PackageReference Include="Google.Protobuf" Version="3.2.0" />
+  </ItemGroup>
+</Project>
