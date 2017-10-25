@@ -8,7 +8,7 @@ namespace Bunsan.Broker
 {
     public class SubmitClient
     {
-        private const string ExtensionSingleTypeUrl = "type.googleapis.com/bacs.problem.single.ProblemExtension";
+        private const string ExtensionSingleTypeUrl = "type.googleapis.com/bacs.problem.single.ProfileExtension";
         protected ClientSender clientSender;
 
         public SubmitClient(Configuration configuration)
