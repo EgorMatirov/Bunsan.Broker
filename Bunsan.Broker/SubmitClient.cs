@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Bacs.Problem;
+using Bacs.Problem.Single;
 using Bacs.Problem.Single.Process;
 using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
@@ -8,6 +9,13 @@ namespace Bunsan.Broker
 {
     public class SubmitClient
     {
+        public enum ContinueConditionChange
+        {
+            DoNotChange,
+            WhileOk,
+            Always
+        }
+        
         private const string ExtensionSingleTypeUrl = "type.googleapis.com/bacs.problem.single.ProfileExtension";
         protected ClientSender clientSender;
 
@@ -19,9 +27,9 @@ namespace Bunsan.Broker
         protected Configuration Configuration { get; }
         protected ClientSender ClientSender => clientSender ?? (clientSender = new ClientSender(Configuration.ConnectionParameters));
 
-        public void Submit(SubmitData submitData, bool shouldIncludeFiles = true)
+        public void Submit(SubmitData submitData, bool shouldIncludeFiles = true, ContinueConditionChange continueConditionChange = ContinueConditionChange.DoNotChange)
         {
-            var bunsanTask = CreateBunsanTask(submitData, shouldIncludeFiles).ToByteArray();
+            var bunsanTask = CreateBunsanTask(submitData, shouldIncludeFiles, continueConditionChange).ToByteArray();
             ClientSender.Send(
                 new Constraints {Resource = {Configuration.WorkerResourceName}},
                 submitData.Identifier,
@@ -35,7 +43,7 @@ namespace Bunsan.Broker
 
         private const ulong OutputFilesSize = 10000;
 
-        public static Bacs.Problem.Single.Task CreateBunsanTask(SubmitData submitData, bool shouldIncludeFiles)
+        public static Bacs.Problem.Single.Task CreateBunsanTask(SubmitData submitData, bool shouldIncludeFiles, ContinueConditionChange continueConditionChange)
         {
             var problem = submitData.Problem;
             var solution = submitData.Solution;
@@ -45,7 +53,18 @@ namespace Bunsan.Broker
                 Revision = Revision.Parser.ParseFrom(problem.System.Revision.ToByteArray())
             };
 
-            var testing = Bacs.Problem.Single.ProfileExtension.Parser.ParseFrom(problem.Profile.First().Extension.Value);
+            var testing = ProfileExtension.Parser.ParseFrom(problem.Profile.First().Extension.Value);
+
+            if (continueConditionChange != ContinueConditionChange.DoNotChange)
+            {
+                var newContinueCondition = continueConditionChange == ContinueConditionChange.Always
+                    ? TestSequence.Types.ContinueCondition.Always
+                    : TestSequence.Types.ContinueCondition.WhileOk;
+                foreach(var test in testing.TestGroup)
+                {
+                    test.Tests.ContinueCondition = newContinueCondition;
+                }
+            }
 
             if (submitData.PretestsOnly)
             {
