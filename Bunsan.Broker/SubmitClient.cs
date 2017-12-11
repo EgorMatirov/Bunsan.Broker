@@ -11,7 +11,7 @@ namespace Bunsan.Broker
     {
         public enum ContinueConditionChange
         {
-            DoNotChange,
+            Default,
             WhileOk,
             Always
         }
@@ -27,7 +27,7 @@ namespace Bunsan.Broker
         protected Configuration Configuration { get; }
         protected ClientSender ClientSender => clientSender ?? (clientSender = new ClientSender(Configuration.ConnectionParameters));
 
-        public void Submit(SubmitData submitData, bool shouldIncludeFiles = true, ContinueConditionChange continueConditionChange = ContinueConditionChange.DoNotChange)
+        public void Submit(SubmitData submitData, bool shouldIncludeFiles = true, ContinueConditionChange continueConditionChange = ContinueConditionChange.Default)
         {
             var bunsanTask = CreateBunsanTask(submitData, shouldIncludeFiles, continueConditionChange).ToByteArray();
             ClientSender.Send(
@@ -55,7 +55,7 @@ namespace Bunsan.Broker
 
             var testing = ProfileExtension.Parser.ParseFrom(problem.Profile.First().Extension.Value);
 
-            if (continueConditionChange != ContinueConditionChange.DoNotChange)
+            if (continueConditionChange != ContinueConditionChange.Default)
             {
                 var newContinueCondition = continueConditionChange == ContinueConditionChange.Always
                     ? TestSequence.Types.ContinueCondition.Always
